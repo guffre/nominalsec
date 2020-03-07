@@ -3,24 +3,34 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-function get_latest(){
-        var latest_attempts = $.ajax({
-            type: "GET",
-            dataType: "html",
-            url: "latest.php",
-            complete: function(){ setTimeout(function(){get_latest();}, 5000); }
-        });
-        $('div.latest-attempts-box').html(latest_attempts);
-};
+        function get_latest(){
+            var latest_attempts = $.ajax({
+                type: "GET",
+                dataType: "html",
+                url: "latest.php",
+                complete: function(){ setTimeout(function(){get_latest();}, 5000); }
+            });
+            $('div.latest-attempts-box').html(latest_attempts);
+        };
 
-function get_stats(){
-        var stats = $.ajax({
-            type: "GET",
-            dataType: "html",
-            url: "stats.php",
-        }).responseText;
-        $('div.stats-box').html(stats);
-};
+        function get_stats(){
+            var stats = $.ajax({
+                type: "GET",
+                dataType: "html",
+                url: "stats.php",
+            }).responseText;
+            $('div.stats-box').html(stats);
+        };
+
+        function get_top_ten(){
+            var top_ten = $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: "top_ten.php",
+                async: false
+            }).responseText;
+            return top_ten;
+        };
 
         $(document).ready(function(){
             new get_latest();
@@ -28,25 +38,18 @@ function get_stats(){
         });
     </script>
     <script type="text/javascript">
-        $(document).ready(function () {
-            function get_top_ten() {
-                var top_ten = $.ajax({
-                    type: "GET",
-                    dataType: "json",
-                    url: "top_ten.php",
-                    async: false
-                }).responseText;
-            };
+        $(document).ready(function(){
+
         google.charts.load("current", {packages:["imagepiechart"]});
         google.charts.setOnLoadCallback(drawChart);
 
         function drawChart() {
-          // ['Task', 'Hours per Day'],['Work',        11],['Sleep',       7]]
-          var data = google.visualization.arrayToDataTable(top_ten);
-          var chart = new google.visualization.ImagePieChart(document.getElementById('chart_div'));
-          chart.draw(data, {width: 430, height: 240, title: 'Top Ten Passwords'});
+            // ['Task', 'Hours per Day'],['Work',        11],['Sleep',       7]]
+            var data = google.visualization.arrayToDataTable(jQuery.parseJSON(get_top_ten())["data"]);
+            var chart = new google.visualization.ImagePieChart(document.getElementById('chart_div'));
+            chart.draw(data, {width: 430, height: 240, title: 'Top Ten Passwords'});
         };
-      });
+    });
     </script>
 </head>
 <body>

@@ -22,11 +22,8 @@ def top_ten():
 	db = sqlite3.connect('/var/log/passwords.db')
 	cursor = db.cursor()
 	data = cursor.execute('SELECT password,COUNT(*) from passwords group by password order by COUNT(*) DESC LIMIT 10;')
-	data = {k:v for k,v in data.fetchall()}
-	data = sorted(data.iteritems(), reverse=True, key=lambda x: x[1])
-	return jsonify(data)
+	return jsonify({"data": [["password","count"]] + data.fetchall()})
 
 if __name__ == "__main__":
     run_port = int(sys.argv[-1])
     app.run(host="0.0.0.0", port=run_port)
-
