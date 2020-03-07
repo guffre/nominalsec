@@ -1,0 +1,58 @@
+<html>
+<head>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+function get_latest(){
+        var latest_attempts = $.ajax({
+            type: "GET",
+            dataType: "html",
+            url: "latest.php",
+            complete: function(){ setTimeout(function(){get_latest();}, 5000); }
+        });
+        $('div.latest-attempts-box').html(latest_attempts);
+};
+
+function get_stats(){
+        var stats = $.ajax({
+            type: "GET",
+            dataType: "html",
+            url: "stats.php",
+        }).responseText;
+        $('div.stats-box').html(stats);
+};
+
+        $(document).ready(function(){
+            new get_latest();
+            new get_stats();
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            function get_top_ten() {
+                var top_ten = $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    url: "top_ten.php",
+                    async: false
+                }).responseText;
+            };
+        google.charts.load("current", {packages:["imagepiechart"]});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+          // ['Task', 'Hours per Day'],['Work',        11],['Sleep',       7]]
+          var data = google.visualization.arrayToDataTable(top_ten);
+          var chart = new google.visualization.ImagePieChart(document.getElementById('chart_div'));
+          chart.draw(data, {width: 430, height: 240, title: 'Top Ten Passwords'});
+        };
+      });
+    </script>
+</head>
+<body>
+    <div id="top-bar" style="width:100%; height: 100px;"></div>
+    <div id="chart_div" style="width: 400px; height: 240px;"></div>
+    <div id="stats-box" style="width: 400px; height: 70%;"></div>
+    <div id="latest-attempts-box" style="width: 400px; height: 70%;"></div>
+</body>
+</html>
