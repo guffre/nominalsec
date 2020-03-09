@@ -2,42 +2,9 @@
 <head>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="/static/js/index.js"></script>
     <script type="text/javascript">
-        function get_latest(){
-            var latest_attempts = $.ajax({
-                type: "GET",
-                dataType: "html",
-                url: "latest.php",
-                complete: function(){ setTimeout(function(){get_latest();}, 5000); }
-            });
-            $('div.latest-attempts-box').html(latest_attempts);
-        };
-
-        function get_stats(){
-            var stats = $.ajax({
-                type: "GET",
-                dataType: "html",
-                url: "stats.php",
-            }).responseText;
-            $('div.stats-box').html(stats);
-        };
-
-        function get_top_ten(){
-            var top_ten = $.ajax({
-                type: "GET",
-                dataType: "json",
-                url: "top_ten.php",
-                async: false
-            }).responseText;
-            return top_ten;
-        };
-
-        $(document).ready(function(){
-            new get_latest();
-            new get_stats();
-        });
-    </script>
-    <script type="text/javascript">
+        // This script block draws a pie chart with the top-ten most common passwords displayed
         $(document).ready(function(){
 
         google.charts.load("current", {packages:["imagepiechart"]});
