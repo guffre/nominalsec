@@ -5,9 +5,10 @@ function get_latest(){
         type: "GET",
         dataType: "html",
         url: "latest.php",
+        async: false,
         complete: function(){ setTimeout(function(){get_latest();}, 5000); }
-    });
-    $('div.latest-attempts-box').html(latest_attempts);
+    }).responseText;
+    $('div#latest-attempts-box').html(latest_attempts);
 };
 
 // This function gets the top ten most common seen passwords from the database file
@@ -29,8 +30,9 @@ function get_stats(){
         type: "GET",
         dataType: "html",
         url: "stats.php",
+        async: false
     }).responseText;
-    $('div.stats-box').html(stats);
+    $('div#stats-box').html(stats);
 };
 
 $(document).ready(function(){
