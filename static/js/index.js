@@ -35,7 +35,24 @@ function get_stats(){
     $('div#stats-box').html(stats);
 };
 
+// todo: Submit value for testing with libcrack
+function clickTest(){
+    var test = document.getElementById("testbutton").value;
+    console.log(test);
+  };
+
+// This script block draws a pie chart with the top-ten most common passwords displayed
 $(document).ready(function(){
     new get_latest();
     new get_stats();
+
+    google.charts.load("current", {packages:["imagepiechart"]});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        // ['Task', 'Hours per Day'],['Work',        11],['Sleep',       7]]
+        var data = google.visualization.arrayToDataTable(jQuery.parseJSON(get_top_ten())["data"]);
+        var chart = new google.visualization.ImagePieChart(document.getElementById('chart_div'));
+        chart.draw(data, {width: 430, height: 240, title: 'Top Ten Passwords'});
+    };
 });

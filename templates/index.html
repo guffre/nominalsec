@@ -1,28 +1,29 @@
 <html>
 <head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}" />
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript" src="/static/js/index.js"></script>
-    <script type="text/javascript">
-        // This script block draws a pie chart with the top-ten most common passwords displayed
-        $(document).ready(function(){
-
-        google.charts.load("current", {packages:["imagepiechart"]});
-        google.charts.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-            // ['Task', 'Hours per Day'],['Work',        11],['Sleep',       7]]
-            var data = google.visualization.arrayToDataTable(jQuery.parseJSON(get_top_ten())["data"]);
-            var chart = new google.visualization.ImagePieChart(document.getElementById('chart_div'));
-            chart.draw(data, {width: 430, height: 240, title: 'Top Ten Passwords'});
-        };
-    });
-    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/index.js') }}"></script>
 </head>
-<body>
-    <div id="top-bar" style="width:100%; height: 100px;">NominalCorp</div>
-    <div id="chart_div" style="width: 400px; height: 240px; float:left;"></div>
-    <div id="stats-box" style="width: 400px; height: 200px; float:left;"></div>
-    <div id="latest-attempts-box" style="width: 400px; height: 70%; float:left;"></div>
+<body style="background: url({{ url_for('static', filename='img/background.jpg') }})">
+    <div id="top-bar" style="width:100%; height: 100px;">
+        <img src="{{ url_for('static', filename='img/logo.gif') }}">
+    </div>
+    <div id="stats-box" style="width: 25%; height: 20%; float:left"></div>
+    <div id="latest-attempts-box" style="width: 35%; height: 20%; float:left;"></div>
+    <div id="chart_div" style="width: 500px; height: 240px; float:left;"></div>
+    <div id="filler"  style="width: 100%; height: 20%; float:left;"></div>
+    <div id="filler2" style="width: 500px; height: 240px;"></div>
+    <div id="download_div" style="width: 500px; height: 240px; float:left;">
+        <a href="passwords.php">View All Passwords</a>
+    </div>
+    <div id="check_pw_div" style="width: 500px; height: 240px; float:left;">
+      <div class="inner-wrap">
+        <label>Check Password: <input id="testbutton" type="pw" name="pw" /></label>
+      </div>
+      <div class="button-section">
+        <button onclick="clickTest()">Submit</button>
+      </div>
+    </div>
 </body>
 </html>

@@ -2,6 +2,7 @@
 
 from flask import Flask
 from flask import render_template
+from flask import send_file
 from flask import send_from_directory
 from flask import jsonify
 
@@ -16,11 +17,6 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     return render_template("index.html")
-
-# This serves javascript files from the static/js directory
-@app.route('/static/js/<path:path>')
-def send_js(path):
-    return send_from_directory('static/js', path)
 
 # Serves the top-ten most common passwords, retrieved from the database
 @app.route("/top_ten.php")
@@ -48,18 +44,22 @@ def stats():
     cursor = db.cursor()
     
     data = cursor.execute('SELECT COUNT(DISTINCT PASSWORD) from passwords;')
-    pwcount = data.fetchall()
+    pwcount = data.fetchall()[0][0]
     html = "Total Unique Passwords collected: {0}<br>".format(pwcount)
     
     data = cursor.execute("SELECT COUNT(DISTINCT USERNAME) from passwords;")
-    uncount = data.fetchall()
+    uncount = data.fetchall()[0][0]
     html += "Total Unique Usernames collected: {0}<br>".format(uncount)
     
     data = cursor.execute("SELECT COUNT(DISTINCT IP_ADDRESS) from passwords;")
-    ipcount = data.fetchall()
+    ipcount = data.fetchall()[0][0]
     html += "Total Attacking IPs seen: {0}<br>".format(ipcount)
     
     return html
+
+@app.route("/check_passwords.php")
+def passwords():
+    return "test"
 
 # Runs the webserver
 if __name__ == "__main__":
