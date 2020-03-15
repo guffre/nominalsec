@@ -23,12 +23,12 @@ def index():
 # Serves the top-ten most common passwords, retrieved from the database
 @app.route("/top_ten.php")
 def top_ten():
-	db = sqlite3.connect('/var/log/passwords.db')
+    db = sqlite3.connect('/var/log/passwords.db')
     db.text_factory = str
-	cursor = db.cursor()
-
-	data = cursor.execute('SELECT PASSWORD,COUNT(*) from passwords group by PASSWORD order by COUNT(*) DESC LIMIT 10;')
-	return jsonify({"data": [["password","count"]] + data.fetchall()})
+    cursor = db.cursor()
+    
+    data = cursor.execute('SELECT PASSWORD,COUNT(*) from passwords group by PASSWORD order by COUNT(*) DESC LIMIT 10;')
+    return jsonify({"data": [["password","count"]] + data.fetchall()})
 
 @app.route("/latest.php")
 def latest():
