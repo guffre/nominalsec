@@ -35,7 +35,7 @@ function get_stats(){
     $('div#stats-box').html(stats);
 };
 
-// todo: Submit value for testing with libcrack
+// Submits a password for testing against libcrack
 function check_password(){
     var check = document.getElementById("testbutton").value;
     console.log(check);
