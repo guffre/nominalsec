@@ -24,14 +24,18 @@ def index():
 @app.route("/top_ten.php")
 def top_ten():
 	db = sqlite3.connect('/var/log/passwords.db')
+    db.text_factory = str
 	cursor = db.cursor()
+
 	data = cursor.execute('SELECT PASSWORD,COUNT(*) from passwords group by PASSWORD order by COUNT(*) DESC LIMIT 10;')
 	return jsonify({"data": [["password","count"]] + data.fetchall()})
 
 @app.route("/latest.php")
 def latest():
     db = sqlite3.connect('/var/log/passwords.db')
+    db.text_factory = str
     cursor = db.cursor()
+    
     data = cursor.execute('SELECT TIMESTAMP_SECS,PASSWORD from passwords group by TIMESTAMP_SECS order by TIMESTAMP_SECS DESC LIMIT 10;')
     data = data.fetchall()
     html = "Most Recent Passwords Collected:<br>"
@@ -43,6 +47,7 @@ def latest():
 @app.route("/stats.php")
 def stats():
     db = sqlite3.connect('/var/log/passwords.db')
+    db.text_factory = str
     cursor = db.cursor()
     
     data = cursor.execute('SELECT COUNT(DISTINCT PASSWORD) from passwords;')
@@ -62,10 +67,12 @@ def stats():
 @app.route("/passwords.php")
 def get_passwords():
     db = sqlite3.connect('/var/log/passwords.db')
+    db.text_factory = str
     cursor = db.cursor()
+
     data = cursor.execute('SELECT DISTINCT PASSWORD from PASSWORDS ORDER BY PASSWORD;')
     data = data.fetchall()
-
+    
     html = '<br>\n'.join(password[0] for password in data)
     return html
 
@@ -81,4 +88,3 @@ def check_password():
 if __name__ == "__main__":
     run_port = int(sys.argv[-1])
     app.run(host="0.0.0.0", port=run_port)
-
