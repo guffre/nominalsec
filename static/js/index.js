@@ -46,7 +46,18 @@ function check_password(){
         async: false
     }).responseText;
     $('div#result-box').html(result);
-  };
+};
+
+// Gets the result of running a password policy update
+function update_password_policy(){
+    var result = $.ajax({
+        type: "GET",
+        dataType: "html",
+        url: "update_password_policy.php",
+        async: false
+    }).responseText;
+    $('div#policy-result-box').html(result);
+};
 
 // This script block draws a pie chart with the top-ten most common passwords displayed
 $(document).ready(function(){

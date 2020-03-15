@@ -91,6 +91,20 @@ def check_password():
     result = subprocess.check_output("cracklib-check", stdin=pipe.stdout)
     return result
 
+# This updates the password policy (using cracklib) on the server
+@app.route("/update_password_policy.php")
+def update_password_policy():
+    db = sqlite3.connect('/var/log/passwords.db')
+    db.text_factory = str
+    cursor = db.cursor()
+
+    data = cursor.execute('SELECT DISTINCT PASSWORD from PASSWORDS;')
+    data = data.fetchall()
+    
+    pw_count = len(data)
+    # todo, figure out how to write the passwords to the install directory
+    return "Update not fully functional yet<br>There are {} passwords to add".format(pw_count)
+
 # Runs the webserver
 if __name__ == "__main__":
     run_port = int(sys.argv[-1])
