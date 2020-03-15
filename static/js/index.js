@@ -36,9 +36,16 @@ function get_stats(){
 };
 
 // todo: Submit value for testing with libcrack
-function clickTest(){
-    var test = document.getElementById("testbutton").value;
-    console.log(test);
+function check_password(){
+    var check = document.getElementById("testbutton").value;
+    console.log(check);
+    var result = $.ajax({
+        type: "GET",
+        dataType: "html",
+        url: "check_password.php?check=" + check,
+        async: false
+    }).responseText;
+    $('div#result-box').html(result);
   };
 
 // This script block draws a pie chart with the top-ten most common passwords displayed

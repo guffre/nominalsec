@@ -5,11 +5,13 @@ from flask import render_template
 from flask import send_file
 from flask import send_from_directory
 from flask import jsonify
+from flask import request
 
 from datetime import datetime
 
 import sqlite3
 import sys
+import subprocess
 
 app = Flask(__name__)
 
@@ -57,9 +59,23 @@ def stats():
     
     return html
 
-@app.route("/check_passwords.php")
-def passwords():
-    return "test"
+@app.route("/passwords.php")
+def get_passwords():
+    db = sqlite3.connect('/var/log/passwords.db')
+    cursor = db.cursor()
+    data = cursor.execute('SELECT DISTINCT PASSWORD from PASSWORDS ORDER BY PASSWORD;')
+    data = data.fetchall()
+
+    html = '<br>\n'.join(password[0] for password in data)
+    return html
+
+@app.route("/check_password.php")
+def check_password():
+    word = request.args.get('check')
+    word = ''.join(char for char in word if char != '"')
+    pipe = subprocess.Popen(["echo", "-n", word], stdout=subprocess.PIPE)
+    result = subprocess.check_output("cracklib-check", stdin=pipe.stdout)
+    return result
 
 # Runs the webserver
 if __name__ == "__main__":
