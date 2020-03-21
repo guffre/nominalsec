@@ -9,6 +9,7 @@ from flask import request
 
 from datetime import datetime
 
+import os
 import sqlite3
 import sys
 import subprocess
@@ -102,8 +103,11 @@ def update_password_policy():
     data = data.fetchall()
     
     pw_count = len(data)
-    # todo, figure out how to write the passwords to the install directory
-    return "Update not fully functional yet<br>There are {} passwords to add".format(pw_count)
+    wordlist = '\n'.join(word[0] for word in data)
+    with open("/com/wordlist", "w") as f:
+        f.write(wordlist)
+    os.system("update-cracklib")
+    return "Updated {} passwords into password-blocking policy".format(pw_count)
 
 # Runs the webserver
 if __name__ == "__main__":
