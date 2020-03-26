@@ -31,7 +31,7 @@ def _fetch_latest():
             cursor = db.cursor()
             data = cursor.execute('SELECT TIMESTAMP_SECS,PASSWORD from passwords group by TIMESTAMP_SECS order by TIMESTAMP_SECS DESC LIMIT 10;')
             data = data.fetchall()
-        html = "Most Recent Passwords Collected:<br>"
+        html = ""
         for timestamp,password in data:
             timestamp = datetime.utcfromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
             html += "{0} : {1}<br>".format(timestamp, password)

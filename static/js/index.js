@@ -8,7 +8,7 @@ function get_latest(){
         async: false,
         complete: function(){ setTimeout(function(){get_latest();}, 5000); }
     }).responseText;
-    $('div#latest-attempts-box').html(latest_attempts);
+    $('div#latest-attempts-box-inner').html(latest_attempts);
 };
 
 // This function gets the top ten most common seen passwords from the database file
@@ -32,7 +32,7 @@ function get_stats(){
         url: "stats.php",
         async: false
     }).responseText;
-    $('div#stats-box').html(stats);
+    $('div#stats-box-inner').html(stats);
 };
 
 // Submits a password for testing against libcrack
@@ -45,7 +45,7 @@ function check_password(){
         url: "check_password.php?check=" + check,
         async: false
     }).responseText;
-    $('div#result-box').html(result);
+    $('div#password-result-box').html(result);
 };
 
 // Gets the result of running a password policy update
@@ -69,8 +69,63 @@ $(document).ready(function(){
 
     function drawChart() {
         // ['Task', 'Hours per Day'],['Work',        11],['Sleep',       7]]
+        var chart = new google.visualization.ImagePieChart(document.getElementById('chart-box-inner'));
         var data = google.visualization.arrayToDataTable(jQuery.parseJSON(get_top_ten())["data"]);
-        var chart = new google.visualization.ImagePieChart(document.getElementById('chart_div'));
-        chart.draw(data, {width: 430, height: 240, title: 'Top Ten Passwords'});
+        var options = {
+            width: 430,
+            height: 240,
+            backgroundColor: '#313131',
+            legend: {
+                textStyle: { color: 'white',
+                            bold: true
+                }
+            }
+        }
+        chart.draw(data,options );
     };
 });
+
+// Make the DIV element draggable:
+$(document).ready(function() {
+    dragElement(document.getElementById("stats-box"));
+    dragElement(document.getElementById("latest-attempts-box"));
+    dragElement(document.getElementById("chart-box"));
+    dragElement(document.getElementById("policy-box"));
+    dragElement(document.getElementById("password-box"));
+});
+
+function dragElement(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    elmnt.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        // stop moving when mouse button is released:
+        document.onmouseup = null;
+        document.onmousemove = null;
+        document.getElementById("testbutton").focus();
+    }
+}
