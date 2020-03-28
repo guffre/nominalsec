@@ -56,7 +56,10 @@ def top_ten():
         cursor = db.cursor()
         data = cursor.execute('SELECT PASSWORD,COUNT(*) from passwords group by PASSWORD order by COUNT(*) DESC LIMIT 10;')
         data = data.fetchall()
-    return jsonify({"data": [["password","count"]] + data})
+    # Format for json delivery
+    words,values = zip(*data)
+    
+    return jsonify({"words":words, "values":values})
 
 # This returns the newest 10 password attempts
 @app.route("/latest.php")
@@ -154,13 +157,8 @@ def get_attempt_counts():
             attempt_counter[check.date()] += 1
     
     # Format for json delivery
-    dates =  []
-    values = []
-    for current_date,value in sorted(attempt_counter.iteritems()):
-        dates.append(current_date.isoformat())
-        values.append(value)
-        
-    return jsonify({"dates":dates, "values":values})
+    dates,values = zip(*sorted(attempt_counter.iteritems()))
+    return jsonify({"dates":[str(d) for d in dates], "values":values})
 
 # Runs the webserver
 if __name__ == "__main__":

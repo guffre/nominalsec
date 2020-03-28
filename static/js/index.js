@@ -1,12 +1,16 @@
 // This function will retrieve the most recent passwords added to the database file
 // It will then update the div with id "latest-attempts-box"
-function get_latest(){
+// Default of 6000 "GET"s, which is a little over 8 hours of live updates
+function get_latest(count=6000){
     var latest_attempts = $.ajax({
         type: "GET",
         dataType: "html",
         url: "latest.php",
         async: false,
-        complete: function(){ setTimeout(function(){get_latest();}, 5000); }
+        complete: function(){ 
+            if (count > 0) {
+                setTimeout(function(){ get_latest(count-1);}, 5000); }
+            }
     }).responseText;
     $('div#latest-attempts-box-inner').html(latest_attempts);
 };
@@ -70,8 +74,8 @@ function update_password_policy(){
     $('div#policy-result-box').html(result);
 };
 
-// Uses Plotly to create a line graph displaying the attempts
-function get_attempt_count() {
+// Uses Plotly to create a line graph displaying login attempt counts
+function make_attempt_chart() {
     var data = jQuery.parseJSON(get_attempts());
     var xval = data["dates"];
     var yval = data["values"];
@@ -83,10 +87,10 @@ function get_attempt_count() {
         textposition: 'auto',
         hoverinfo: 'none',
         marker: {
-            color: 'rgb(158,202,225)',
+            color: 'darkslategray',
             opacity: 0.6,
             line: {
-                color: 'rgb(8,48,107)',
+                color: 'white',
                 width: 1.5
             }
         }
@@ -95,43 +99,36 @@ function get_attempt_count() {
     var layout = {
         margin: { l: "50", r:"20", t:"10", b:"35"},
         paper_bgcolor: "#313131",
-        xaxis: {
-            tickfont: { color: "white"}
-        },
-        yaxis: {
-            tickfont: { color: "white"}
-        }
-
+        plot_bgcolor: "#313131",
+        xaxis: { color: "white" },
+        yaxis: { color: "white" }
     };
     Plotly.newPlot('attempt-box-inner', data, layout);
 };
 
-// This script block draws a pie chart with the top-ten most common passwords displayed
-$(document).ready(function(){
-    new get_latest();
-    new get_stats();
-    new get_attempt_count();
-
-    google.charts.load("current", {packages:["imagepiechart"]});
-    google.charts.setOnLoadCallback(drawChart);
-
-    function drawChart() {
-        // ['Task', 'Hours per Day'],['Work',        11],['Sleep',       7]]
-        var chart = new google.visualization.ImagePieChart(document.getElementById('chart-box-inner'));
-        var data = google.visualization.arrayToDataTable(jQuery.parseJSON(get_top_ten())["data"]);
-        var options = {
-            width: 430,
-            height: 240,
-            backgroundColor: '#313131',
-            legend: {
-                textStyle: { color: 'white',
-                            bold: true
-                }
-            }
+// Use Plotly to create a pie chart displaying top ten passwords
+function make_top_ten_chart() {
+    var data = jQuery.parseJSON(get_top_ten());
+    var trace = [{
+        type: "pie",
+        values: data["values"],
+        labels: data["words"],
+        textinfo: "label",
+        insidetextorientation: "radial"
+    }]
+      
+    var layout = {
+        margin: { l: "20", r:"20", t:"20", b:"20"},
+        height: 320,
+        width: 500,
+        paper_bgcolor: "#313131",
+        plot_bgcolor: "#313131",
+        font: {
+            color: "white"
         }
-        chart.draw(data,options );
-    };
-});
+    }
+    Plotly.newPlot('chart-box-inner', trace, layout)
+}
 
 // Make the DIV elements draggable
 $(document).ready(function() {
@@ -141,6 +138,11 @@ $(document).ready(function() {
     dragElement(document.getElementById("policy-box"));
     dragElement(document.getElementById("password-box"));
     dragElement(document.getElementById("attempt-box"));
+
+    new get_latest();
+    new get_stats();
+    new make_attempt_chart();
+    new make_top_ten_chart();
 });
 
 // Draggable functionality, retrieved from W3Schools
