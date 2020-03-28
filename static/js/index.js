@@ -174,7 +174,22 @@ function dragElement(elmnt) {
         elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
     }
 
-    function closeDragElement() {
+    function closeDragElement(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // Snap to grid
+        var top = Math.floor((elmnt.offsetTop - pos2)/10)*10;
+        var left = Math.floor((elmnt.offsetLeft - pos1)/10)*10;
+        // set the element's new position
+        elmnt.style.top = top + "px";
+        elmnt.style.left = left + "px";
+
+
         // stop moving when mouse button is released
         document.onmouseup = null;
         document.onmousemove = null;

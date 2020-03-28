@@ -15,34 +15,34 @@ a {
 
 #latest-attempts-box {
     width:  650px;
-    height: 365px;
+    height: 360px;
     top:  120px;
-    left: 515px;
+    left: 510px;
     text-align: left;
 }
 
 #chart-box {
     top:  120px;
-    left: 1250px;
+    left: 1240px;
     width: 500px;
-    height: 365px;
+    height: 360px;
 }
 
 #policy-box {
-    top:  335px;
+    top:  330px;
     width: 420px;
     height: 150px;
 }
 
 #password-box {
-    top:  550px;
+    top:  540px;
     width: 420px;
     height: 200px;
 }
 
 #attempt-box {
-    top:  550px;
-    left: 515px;
+    top:  540px;
+    left: 510px;
     width: 650px;
     height: 200px;
 }
