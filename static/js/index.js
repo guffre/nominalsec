@@ -23,6 +23,17 @@ function get_top_ten(){
     return top_ten;
 };
 
+// Retrieves the counts of login attempts against the server
+function get_attempts(){
+    var attempts = $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: "attempts.php",
+        async: false
+    }).responseText;
+    return attempts;
+};
+
 // This function will retrieve various statistics about the password collection
 // It will then update the div with id "stats-box"
 function get_stats(){
@@ -59,10 +70,47 @@ function update_password_policy(){
     $('div#policy-result-box').html(result);
 };
 
+// Uses Plotly to create a line graph displaying the attempts
+function get_attempt_count() {
+    var data = jQuery.parseJSON(get_attempts());
+    var xval = data["dates"];
+    var yval = data["values"];
+    var trace1 = {
+        x: xval,
+        y: yval,
+        type: 'bar',
+        text: yval.map(String),
+        textposition: 'auto',
+        hoverinfo: 'none',
+        marker: {
+            color: 'rgb(158,202,225)',
+            opacity: 0.6,
+            line: {
+                color: 'rgb(8,48,107)',
+                width: 1.5
+            }
+        }
+    };
+    var data = [trace1];
+    var layout = {
+        margin: { l: "50", r:"20", t:"10", b:"35"},
+        paper_bgcolor: "#313131",
+        xaxis: {
+            tickfont: { color: "white"}
+        },
+        yaxis: {
+            tickfont: { color: "white"}
+        }
+
+    };
+    Plotly.newPlot('attempt-box-inner', data, layout);
+};
+
 // This script block draws a pie chart with the top-ten most common passwords displayed
 $(document).ready(function(){
     new get_latest();
     new get_stats();
+    new get_attempt_count();
 
     google.charts.load("current", {packages:["imagepiechart"]});
     google.charts.setOnLoadCallback(drawChart);
@@ -85,15 +133,17 @@ $(document).ready(function(){
     };
 });
 
-// Make the DIV element draggable:
+// Make the DIV elements draggable
 $(document).ready(function() {
     dragElement(document.getElementById("stats-box"));
     dragElement(document.getElementById("latest-attempts-box"));
     dragElement(document.getElementById("chart-box"));
     dragElement(document.getElementById("policy-box"));
     dragElement(document.getElementById("password-box"));
+    dragElement(document.getElementById("attempt-box"));
 });
 
+// Draggable functionality, retrieved from W3Schools
 function dragElement(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     elmnt.onmousedown = dragMouseDown;
@@ -101,29 +151,29 @@ function dragElement(elmnt) {
     function dragMouseDown(e) {
         e = e || window.event;
         e.preventDefault();
-        // get the mouse cursor position at startup:
+        // get the mouse cursor position at startup
         pos3 = e.clientX;
         pos4 = e.clientY;
         document.onmouseup = closeDragElement;
-        // call a function whenever the cursor moves:
+        // call a function whenever the cursor moves
         document.onmousemove = elementDrag;
     }
 
     function elementDrag(e) {
         e = e || window.event;
         e.preventDefault();
-        // calculate the new cursor position:
+        // calculate the new cursor position
         pos1 = pos3 - e.clientX;
         pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
-        // set the element's new position:
+        // set the element's new position
         elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
         elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
     }
 
     function closeDragElement() {
-        // stop moving when mouse button is released:
+        // stop moving when mouse button is released
         document.onmouseup = null;
         document.onmousemove = null;
         document.getElementById("testbutton").focus();

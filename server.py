@@ -7,7 +7,9 @@ from flask import send_from_directory
 from flask import jsonify
 from flask import request
 
+from datetime import date
 from datetime import datetime
+from datetime import timedelta
 
 import os
 import sqlite3
@@ -21,9 +23,11 @@ latest_time = time.time()
 latest_html = ""
 
 def _fetch_latest():
+    # Store time and data into cached locations
     global latest_time
     global latest_html
     now = time.time()
+    # Only update the cache every 5 seconds
     if now > latest_time + 5:
         latest_time = now
         with sqlite3.connect('/var/log/passwords.db') as db:
@@ -36,6 +40,7 @@ def _fetch_latest():
             timestamp = datetime.utcfromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
             html += "{0} : {1}<br>".format(timestamp, password)
         latest_html = html
+    # latest_html is the cached return, which gets updated in the above block
     return latest_html
 
 # This is the homepage, so the default page displayed
@@ -59,7 +64,7 @@ def latest():
     html = _fetch_latest()
     return html
 
-# Servers basic statistics about the current password collection operation
+# Serves basic statistics about the current password collection operation
 @app.route("/stats.php")
 def stats():
     with sqlite3.connect('/var/log/passwords.db') as db:
@@ -121,6 +126,41 @@ def update_password_policy():
         f.write(wordlist)
     os.system("update-cracklib")
     return "Updated {} passwords into password-blocking policy".format(pw_count)
+
+# This gets the login attempts over the last 7 days
+@app.route("/attempts.php")
+def get_attempt_counts():
+    # Initialize a dictionary with the last 7 days as keys
+    attempt_counter = dict()
+    for d in range(7):
+        current_date = (datetime.utcnow() - timedelta(days=d)).date()
+        attempt_counter[current_date] = 0
+    
+    # Get minimum timestamp needed for database pull
+    epoch = date(1970,1,1)
+    min_time = int((min(attempt_counter) - epoch).total_seconds())
+    
+    # Pull timestamp data from database
+    with sqlite3.connect('/var/log/passwords.db') as db:
+        db.text_factory = str
+        cursor = db.cursor()
+        data = cursor.execute('SELECT TIMESTAMP_SECS from PASSWORDS WHERE TIMESTAMP_SECS > {};'.format(min_time))
+        times = data.fetchall()
+    
+    # Count the number of attempts by date
+    for time in times:
+        check = datetime.utcfromtimestamp(time[0])
+        if attempt_counter.get(check.date()) != None:
+            attempt_counter[check.date()] += 1
+    
+    # Format for json delivery
+    dates =  []
+    values = []
+    for current_date,value in sorted(attempt_counter.iteritems()):
+        dates.append(current_date.isoformat())
+        values.append(value)
+        
+    return jsonify({"dates":dates, "values":values})
 
 # Runs the webserver
 if __name__ == "__main__":
