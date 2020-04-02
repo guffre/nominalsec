@@ -20,12 +20,12 @@ import time
 app = Flask(__name__)
 
 latest_time = time.time()
-latest_html = ""
+latest_data = ""
 
 def _fetch_latest():
     # Store time and data into cached locations
     global latest_time
-    global latest_html
+    global latest_data
     now = time.time()
     # Only update the cache every 5 seconds
     if now > latest_time + 5:
@@ -34,14 +34,9 @@ def _fetch_latest():
             db.text_factory = str
             cursor = db.cursor()
             data = cursor.execute('SELECT TIMESTAMP_SECS,PASSWORD from passwords group by TIMESTAMP_SECS order by TIMESTAMP_SECS DESC LIMIT 10;')
-            data = data.fetchall()
-        html = ""
-        for timestamp,password in data:
-            timestamp = datetime.utcfromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
-            html += "{0} : {1}<br>".format(timestamp, password)
-        latest_html = html
-    # latest_html is the cached return, which gets updated in the above block
-    return latest_html
+            latest_data = data.fetchall()
+    # latest_data is the cached return, which gets updated in the above block
+    return latest_data
 
 # This is the homepage, so the default page displayed
 @app.route("/")
@@ -64,7 +59,12 @@ def top_ten():
 # This returns the newest 10 password attempts
 @app.route("/latest.php")
 def latest():
-    html = _fetch_latest()
+    data = _fetch_latest()
+    offset = int(request.args.get('t'))
+    html = ""
+    for timestamp,password in data:
+        timestamp = (datetime.utcfromtimestamp(timestamp) - timedelta(minutes=offset)).strftime("%Y-%m-%d %H:%M:%S")
+        html += "{0} : {1}<br>".format(timestamp, password)
     return html
 
 # Serves basic statistics about the current password collection operation
@@ -130,7 +130,7 @@ def update_password_policy():
     os.system("update-cracklib")
     return "Updated {} passwords into password-blocking policy".format(pw_count)
 
-# This gets the login attempts over the last 7 days
+# This gets the login attempts over the last 7 days (UTC)
 @app.route("/attempts.php")
 def get_attempt_counts():
     # Initialize a dictionary with the last 7 days as keys

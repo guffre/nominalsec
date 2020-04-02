@@ -1,15 +1,15 @@
 // This function will retrieve the most recent passwords added to the database file
 // It will then update the div with id "latest-attempts-box"
 // Default of 6000 "GET"s, which is a little over 8 hours of live updates
-function get_latest(count=6000){
+function get_latest(offset, count=6000){
     var latest_attempts = $.ajax({
         type: "GET",
         dataType: "html",
-        url: "latest.php",
+        url: "latest.php?t=" + offset,
         async: false,
         complete: function(){ 
             if (count > 0) {
-                setTimeout(function(){ get_latest(count-1);}, 5000); }
+                setTimeout(function(){ get_latest(offset, count-1);}, 5000); }
             }
     }).responseText;
     $('div#latest-attempts-box-inner').html(latest_attempts);
@@ -139,7 +139,8 @@ $(document).ready(function() {
     dragElement(document.getElementById("password-box"));
     dragElement(document.getElementById("attempt-box"));
 
-    new get_latest();
+    var offset = new Date().getTimezoneOffset();
+    new get_latest(offset);
     new get_stats();
     new make_attempt_chart();
     new make_top_ten_chart();
